@@ -1,0 +1,12 @@
+[project]
+name = "finm-33165-final-project"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "torch",
+    "gymnasium",
+    "numpy",
+    "pandas",
+    "matplotlib",
+]
