@@ -2,9 +2,10 @@
 
 import gymnasium
 import numpy as np
+from numpy import typing as npt
 
 
-class TradingEnv(gymnasium.Env):
+class TradingEnv(gymnasium.Env[npt.NDArray, int]):
     """Trading enviroment."""
 
     def __init__(
