@@ -13,3 +13,14 @@ Recall that this project is a variation on something I had tested out earlier --
 All code used to train the model and evaluate its performance will be written inside `src`. Specifically:
 * `src/agent` contains all code used to define the trading environment and training loop.
 * `src/portfolio_eval` contains all code used to evaluate trading performance.
+
+## Contributing
+
+In order to minimize the probability of merge conflicts, the following constraints are imposed on `src`:
+* Code must be `ruff` compliant
+* Code must be `pylint` compliant
+* Code must be `mypy` compliant
+
+If we adhere to the same style guidelines, we minimize any potential friction in contributing.
+
+**To test all changes locally, simply run** `./format_test.sh`.

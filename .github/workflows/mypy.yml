@@ -1,0 +1,29 @@
+name: Static Type Check
+
+on:
+  push:
+    branches:
+      - main # Or your main branch name
+  pull_request:
+    branches:
+      - main # Or your main branch name
+
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Use the latest version of checkout action
+
+    - name: Set up Python
+      uses: actions/setup-python@v5 # Use the latest version of setup-python action
+      with:
+        python-version: '3.13'
+
+    - name: Install dependencies
+      run: |
+        astral-sh/setup-uv@v7
+        uv sync
+
+    - name: Run Mypy
+      run: mypy --strict src

@@ -1,0 +1,29 @@
+name: Code Format Check
+
+on:
+  push:
+    branches:
+      - main # Or your main branch name
+  pull_request:
+    branches:
+      - main # Or your main branch name
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          astral-sh/setup-uv@v7
+          uv sync
+
+      - name: Run Ruff Check
+        run: ruff check src --output-format=github
