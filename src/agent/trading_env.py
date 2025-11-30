@@ -5,12 +5,12 @@ import numpy as np
 from numpy import typing as npt
 
 
-class TradingEnv(gymnasium.Env[npt.NDArray, int]):
+class TradingEnv(gymnasium.Env[npt.NDArray[np.float64], int]):
     """Trading enviroment."""
 
     def __init__(
         self,
-        prices: np.ndarray,
+        prices: npt.NDArray[np.float64],
         calc_window: int = 20,
         initial_cash: float = 10_000.0,
     ):
