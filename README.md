@@ -23,4 +23,4 @@ In order to minimize the probability of merge conflicts, the following constrain
 
 If we adhere to the same style guidelines, we minimize any potential friction in contributing.
 
-**To test all changes locally, simply run** `./format_test.sh`.
+You must first create your own branch, create a pull request, and then merge said pull request to `main`.
