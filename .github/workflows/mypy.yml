@@ -21,9 +21,8 @@ jobs:
         python-version: '3.13'
 
     - name: Install dependencies
-      run: |
-        astral-sh/setup-uv@v7
-        uv sync
+      uses: astral-sh/setup-uv@v7
+      run: uv sync
 
     - name: Run Mypy
       run: mypy --strict src
