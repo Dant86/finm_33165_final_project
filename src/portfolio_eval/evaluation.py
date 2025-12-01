@@ -26,7 +26,7 @@ for i,a in enumerate(assets):
 
 # Evaluation Plot (1): stacked area chart (probably only for few assets but is a nice visualization)
 
-def plot_weights_area(df, assets):
+def plot_weights_area(df, assets) -> None: 
     df[[f"weights_{a}" for a in assets]].plot.area(figsize=(10,4))
     plt.xlabel("Date")
     plt.ylabel("Weight")
@@ -38,7 +38,7 @@ plot_weights_area(df, assets)
 
 # Evaluation Plot (2): cumulative return
 
-def plot_cum_return(df):
+def plot_cum_return(df) -> None:
     ((1 + df["reward"]).cumprod() - 1).plot(figsize=(10,4))
     plt.title("Cumulative Return")
     plt.xlabel("Date")
@@ -50,7 +50,7 @@ plot_cum_return(df)
 
 # Evaluation Plot (3): drawdown curve
 
-def plot_drawdown(df):
+def plot_drawdown(df) -> None:
     eq = df["portfolio_value"]
     dd = eq - eq.cummax()
     dd.plot(figsize=(10,4))
@@ -62,7 +62,7 @@ def plot_drawdown(df):
 plot_drawdown(df)
 
 # Evaluation Plot (4): rolling Sharpe-ratio
-def plot_rolling_sharpe(df, window=30):
+def plot_rolling_sharpe(df, window=30) -> None:
     r = df["reward"]
     sharpe = r.rolling(window).mean() / r.rolling(window).std()
     sharpe.plot(figsize=(10,4))
