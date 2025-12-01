@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Evaluation for Portfolio Rebalancing Model
+from typing import List
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,7 +27,7 @@ for i,a in enumerate(assets):
 
 # Evaluation Plot (1): stacked area chart (probably only for few assets but is a nice visualization)
 
-def plot_weights_area(df, assets) -> None: 
+def plot_weights_area(df: pd.DataFrame, assets: List[str]) -> None: 
     df[[f"weights_{a}" for a in assets]].plot.area(figsize=(10,4))
     plt.xlabel("Date")
     plt.ylabel("Weight")
@@ -38,7 +39,7 @@ plot_weights_area(df, assets)
 
 # Evaluation Plot (2): cumulative return
 
-def plot_cum_return(df) -> None:
+def plot_cum_return(df: pd.DataFrame) -> None:
     ((1 + df["reward"]).cumprod() - 1).plot(figsize=(10,4))
     plt.title("Cumulative Return")
     plt.xlabel("Date")
@@ -50,7 +51,7 @@ plot_cum_return(df)
 
 # Evaluation Plot (3): drawdown curve
 
-def plot_drawdown(df) -> None:
+def plot_drawdown(df: pd.DataFrame) -> None:
     eq = df["portfolio_value"]
     dd = eq - eq.cummax()
     dd.plot(figsize=(10,4))
@@ -62,7 +63,7 @@ def plot_drawdown(df) -> None:
 plot_drawdown(df)
 
 # Evaluation Plot (4): rolling Sharpe-ratio
-def plot_rolling_sharpe(df, window=30) -> None:
+def plot_rolling_sharpe(df: pd.DataFrame, window: int = 30) -> None:
     r = df["reward"]
     sharpe = r.rolling(window).mean() / r.rolling(window).std()
     sharpe.plot(figsize=(10,4))
