@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec900b07-57ca-4afc-8ae1-780541e95837" name="Changes" comment="Calculation code">
-      <change afterPath="$PROJECT_DIR$/apps/visualize_security_contrib.py" afterDir="false" />
+    <list default="true" id="ec900b07-57ca-4afc-8ae1-780541e95837" name="Changes" comment="More">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/beta_adj_rets.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/beta_adj_rets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/beta_adj_rets.parquet" beforeDir="false" afterPath="$PROJECT_DIR$/data/beta_adj_rets.parquet" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/portfolio_eval/security_contrib.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/portfolio_eval/security_contrib.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +73,7 @@
       <recent name="$PROJECT_DIR$/presentation/reference_materials" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.visualize_security_contrib">
+  <component name="RunManager" selected="Python.beta_adj_rets">
     <configuration name="beta_adj_rets" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="finm_33165_final_project" />
       <option name="ENV_FILES" value="" />
@@ -126,8 +122,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.visualize_security_contrib" />
         <item itemvalue="Python.beta_adj_rets" />
+        <item itemvalue="Python.visualize_security_contrib" />
       </list>
     </recent_temporary>
   </component>
@@ -238,7 +234,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764968744497</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="More">
+      <option name="closed" value="true" />
+      <created>1764973507893</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1764973507893</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -279,10 +283,11 @@
     <MESSAGE value="Fix?" />
     <MESSAGE value="Add type" />
     <MESSAGE value="Calculation code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Calculation code" />
+    <MESSAGE value="More" />
+    <option name="LAST_COMMIT_MESSAGE" value="More" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/finm_33165_final_project$visualize_security_contrib.coverage" NAME="visualize_security_contrib Coverage Results" MODIFIED="1764972125461" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
-    <SUITE FILE_PATH="coverage/finm_33165_final_project$beta_adj_rets.coverage" NAME="beta_adj_rets Coverage Results" MODIFIED="1764971597781" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
+    <SUITE FILE_PATH="coverage/finm_33165_final_project$beta_adj_rets.coverage" NAME="beta_adj_rets Coverage Results" MODIFIED="1764973479110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
   </component>
 </project>
