@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 TICKERS = [
-    "AA",
-    "ABT",
-    "KGC",
-    "KO",
+    "NVDA",
+    "LLY",
+    "JPM",
+    "CAT",
 ]

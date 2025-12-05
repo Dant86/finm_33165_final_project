@@ -71,4 +71,23 @@ def calculate_rolling_volatility(
     for date in positions["date"]:
         vol.append(gmv.loc[date] @ cov @ gmv.loc[date].T)
 
-    return pd.DataFrame(index=positions["date"], data=vol, columns=["volatility"])
+    return pd.DataFrame(
+        index=positions["date"],
+        data=vol,
+        columns=["volatility"],
+    ) ** 0.5
+
+
+def calculate_rolling_volatility_ratio(
+    positions: pd.DataFrame,
+    stock_returns: pd.DataFrame,
+    window_size: int = 126,
+) -> pd.DataFrame:
+    """Calculate rolling volatility ratio."""
+    gmv = calculate_market_value(positions)
+
+    total_vol = calculate_rolling_volatility(positions, stock_returns, window_size)
+
+    sec_vol = gmv.rolling(window_size).std()
+
+    return sec_vol.divide(total_vol["volatility"], axis="index")

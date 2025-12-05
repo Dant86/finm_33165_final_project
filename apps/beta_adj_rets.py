@@ -15,24 +15,24 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--start_date",
+        "--start-date",
         type=str,
         help="Start date for historical data in the format YYYY-MM-DD.",
         default="2005-01-01",
     )
 
     parser.add_argument(
-        "--end_date",
+        "--end-date",
         type=str,
         help="End date for historical data in the format YYYY-MM-DD.",
         default=pd.Timestamp.today(tz="UTC").strftime("%Y-%m-%d"),
     )
 
     parser.add_argument(
-        "--output_path",
+        "--output-dir",
         type=str,
         help="Path to save the output CSV file.",
-        default="../data/beta_adj_rets.parquet",
+        default="../data",
     )
 
     return parser.parse_args()
@@ -70,7 +70,9 @@ def main() -> None:
         market_returns,
     ).dropna()
 
-    market_adjusted_returns.to_parquet(args.output_path)
+    market_adjusted_returns.to_parquet(args.output_dir + "/beta_adj_rets.parquet")
+    stock_returns.to_parquet(args.output_dir + "/stock_rets.parquet")
+    open_prices.to_parquet(args.output_dir + "/open_prices.parquet")
 
 
 if __name__ == "__main__":
