@@ -1,7 +1,10 @@
 # networks_sac.py
+from typing import Tuple, cast
+
 import torch
 import torch.nn as nn
-from typing import Tuple
+from torch import Tensor
+import math
 
 
 class QNetworkContinuous(nn.Module):
@@ -11,7 +14,7 @@ class QNetworkContinuous(nn.Module):
     Output = scalar Q-value.
     """
 
-    def __init__(self, state_dim: int, action_dim: int, hidden_dim: int = 256):
+    def __init__(self, state_dim: int, action_dim: int, hidden_dim: int = 256) -> None:
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(state_dim + action_dim, hidden_dim),
@@ -21,12 +24,14 @@ class QNetworkContinuous(nn.Module):
             nn.Linear(hidden_dim, 1),
         )
 
-    def forward(self, state: torch.Tensor, action: torch.Tensor) -> torch.Tensor:
+    def forward(self, state: Tensor, action: Tensor) -> Tensor:
         """
         Forward pass: concatenate state and action along the last dimension.
         """
         x = torch.cat([state, action], dim=-1)
-        return self.net(x)
+        out = self.net(x)
+        # Tell mypy that Sequential(...) returns a Tensor
+        return cast(Tensor, out)
 
 
 class GaussianPolicy(nn.Module):
@@ -47,9 +52,9 @@ class GaussianPolicy(nn.Module):
         state_dim: int,
         action_dim: int,
         hidden_dim: int = 256,
-        log_std_min: float = -20,
-        log_std_max: float = 2,
-    ):
+        log_std_min: float = -20.0,
+        log_std_max: float = 2.0,
+    ) -> None:
         super().__init__()
         self.log_std_min = log_std_min
         self.log_std_max = log_std_max
@@ -66,7 +71,7 @@ class GaussianPolicy(nn.Module):
         self.mean_head = nn.Linear(hidden_dim, action_dim)
         self.log_std_head = nn.Linear(hidden_dim, action_dim)
 
-    def _sample(self, mean: torch.Tensor, log_std: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _sample(self, mean: Tensor, log_std: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Sample action using:
             z = mean + std * noise
@@ -84,18 +89,21 @@ class GaussianPolicy(nn.Module):
         action = torch.tanh(z)
 
         # Log probability of Gaussian before tanh
+        # Using a scalar log(2π) is safer (no device mismatch) and type-clean.
+        log_two_pi = math.log(2.0 * math.pi)
         log_prob = (
-            -0.5 * ((z - mean) ** 2 / (std ** 2 + 1e-6) + 2 * log_std + torch.log(torch.tensor(2 * torch.pi)))
+            -0.5 * ((z - mean) ** 2 / (std ** 2 + 1e-6) + 2 * log_std + log_two_pi)
         ).sum(dim=-1, keepdim=True)
 
         # Subtract tanh Jacobian correction
-        log_prob -= torch.sum(torch.log(1 - action.pow(2) + 1e-6), dim=-1, keepdim=True)
+        log_prob -= torch.sum(torch.log(1.0 - action.pow(2) + 1e-6), dim=-1, keepdim=True)
 
         return action, log_prob
 
-    def forward(self, state: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, state: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Forward pass during training: sample stochastically.
+
         Returns:
             action ∈ [-1, 1]^N
             log_prob of the sampled action
@@ -108,7 +116,7 @@ class GaussianPolicy(nn.Module):
         action, log_prob = self._sample(mean, log_std)
         return action, log_prob
 
-    def deterministic(self, state: torch.Tensor) -> torch.Tensor:
+    def deterministic(self, state: Tensor) -> Tensor:
         """
         Deterministic policy for evaluation:
         action = tanh(mean(state))
@@ -116,5 +124,3 @@ class GaussianPolicy(nn.Module):
         x = self.base(state)
         mean = self.mean_head(x)
         return torch.tanh(mean)
-
-

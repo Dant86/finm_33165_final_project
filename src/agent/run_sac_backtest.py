@@ -1,15 +1,22 @@
 # run_sac_backtest.py
 
 import pickle
-import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
+from typing import List
 
-from .sac_agent import SACAgent
+import matplotlib.pyplot as plt
+import numpy as np
+from numpy.typing import NDArray
+
 from .env_continuous import ContinuousPortfolioEnv
+from .sac_agent import SACAgent
 
 
-def run_backtest():
+def run_backtest() -> None:
+    """
+    Run a deterministic backtest using a trained SAC model and
+    compute basic performance metrics (Sharpe, MaxDD, CAGR, Calmar).
+    """
 
     # -----------------------------
     # 1. Load price data
@@ -22,10 +29,10 @@ def run_backtest():
 
     # Use selected assets
     selected_cols = [
-        ('Open', 'AAPL'),
-        ('Open', 'AMZN'),
-        ('Open', 'AMD'),
-        ('Open', 'BAC'),
+        ("Open", "AAPL"),
+        ("Open", "AMZN"),
+        ("Open", "AMD"),
+        ("Open", "BAC"),
     ]
     price_df = price_df[selected_cols]
 
@@ -47,41 +54,43 @@ def run_backtest():
     )
 
     model_path = project_root / "saved_models" / "sac_portfolio_model.pth"
-    agent.load(model_path)
+    agent.load(str(model_path))  # cast Path -> str for mypy
 
     # -----------------------------
     # 4. Deterministic evaluation (no exploration noise)
     # -----------------------------
     done = False
-    equity_curve = []
-    weights_history = []
+    equity_values: List[float] = []
+    weights_history: List[NDArray[np.float32]] = []
 
     while not done:
-        action = agent.select_action(obs, eval_mode=True)  # deterministic action
+        # Deterministic action from the policy
+        action = agent.select_action(obs, eval_mode=True)
         obs, _, terminated, truncated, info = env.step(action)
         done = terminated or truncated
 
-        equity_curve.append(info["portfolio_value"])
+        equity_values.append(float(info["portfolio_value"]))
         weights_history.append(env.weights.copy())
 
     # -----------------------------------------------------
     # 5. Compute Sharpe / MaxDD / CAGR / Calmar and save to metrics_sac.txt
     # -----------------------------------------------------
-    equity_curve = np.array(equity_curve)
-    peak = np.maximum.accumulate(equity_curve)
-    drawdown = (equity_curve - peak) / peak
+    equity_curve: NDArray[np.float32] = np.array(equity_values, dtype=np.float32)
 
-    returns = np.diff(equity_curve) / equity_curve[:-1]
-    sharpe = np.mean(returns) / (np.std(returns) + 1e-8)
+    peak: NDArray[np.float32] = np.maximum.accumulate(equity_curve)
+    drawdown: NDArray[np.float32] = (equity_curve - peak) / peak
 
-    max_dd = drawdown.min()
+    returns: NDArray[np.float32] = np.diff(equity_curve) / equity_curve[:-1]
+    sharpe: float = float(np.mean(returns) / (np.std(returns) + 1e-8))
 
-    years = len(equity_curve) / 252  # assume 252 trading days per year
-    CAGR = (equity_curve[-1] / equity_curve[0]) ** (1 / years) - 1
-    calmar = CAGR / abs(max_dd) if max_dd != 0 else np.inf
+    max_dd: float = float(drawdown.min())
 
-    project_root = Path(__file__).resolve().parents[2]  # FINAL_PROJECT/
-    results_dir = project_root / "results_sac"
+    years: float = len(equity_curve) / 252.0  # assume 252 trading days per year
+    CAGR: float = float((equity_curve[-1] / equity_curve[0]) ** (1.0 / years) - 1.0)
+    calmar: float = CAGR / abs(max_dd) if max_dd != 0.0 else float("inf")
+
+    project_root_final = Path(__file__).resolve().parents[2]  # FINAL_PROJECT/
+    results_dir = project_root_final / "results_sac"
     results_dir.mkdir(exist_ok=True)
 
     metrics_path = results_dir / "metrics_sac.txt"

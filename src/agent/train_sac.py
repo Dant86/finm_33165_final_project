@@ -1,18 +1,24 @@
 # train_sac.py
 import pickle
+from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import matplotlib.pyplot as plt
+from numpy.typing import NDArray
 
 from .env_continuous import ContinuousPortfolioEnv
 from .sac_agent import SACAgent
 
 
-def save_plot(fn):
+def save_plot(fn: str) -> None:
+    """
+    Save the current Matplotlib figure under results_sac/plots/{fn}.png.
+    """
     plt.tight_layout()
     project_root = Path(__file__).resolve().parents[2]
-    save_dir = project_root / "results_sac/plots"
+    save_dir = project_root / "results_sac" / "plots"
     save_dir.mkdir(parents=True, exist_ok=True)
     plt.savefig(save_dir / f"{fn}.png", dpi=200)
     plt.close()
@@ -21,32 +27,41 @@ def save_plot(fn):
 def train_sac(
     price_path: str = "price_data.pkl",
     num_episodes: int = 50,
-):
-    price_path = Path(price_path)
-    assert price_path.exists(), f"{price_path} does not exist."
-    price_df: pd.DataFrame = pickle.load(open(price_path, "rb"))
+) -> None:
+    """
+    Train a SAC agent on the given price dataset and run a final deterministic backtest.
+    Training curves and final performance plots are saved to results_sac/plots,
+    and the trained model plus weights history are saved under saved_models/.
+    """
+    price_path_path = Path(price_path)
+    assert price_path_path.exists(), f"{price_path_path} does not exist."
+
+    price_df: pd.DataFrame = pickle.load(open(price_path_path, "rb"))
     price_df = price_df.dropna()
 
+    # Select specific assets
     selected_cols = [
-        ('Open', 'AAPL'),
-        ('Open', 'AMZN'),
-        ('Open', 'AMD'),
-        ('Open', 'BAC'),
+        ("Open", "AAPL"),
+        ("Open", "AMZN"),
+        ("Open", "AMD"),
+        ("Open", "BAC"),
     ]
     price_df = price_df[selected_cols]
 
-    n_assets = price_df.shape[1]
+    n_assets: int = price_df.shape[1]
 
-    env = ContinuousPortfolioEnv(
+    # Environment
+    env: ContinuousPortfolioEnv = ContinuousPortfolioEnv(
         price_df=price_df,
         window=20,
         initial_cash=1_000_000.0,
     )
 
     sample_obs, _ = env.reset()
-    state_dim = sample_obs.shape[0]
-    action_dim = n_assets
+    state_dim: int = sample_obs.shape[0]
+    action_dim: int = n_assets
 
+    # SAC agent
     agent = SACAgent(
         state_dim=state_dim,
         action_dim=action_dim,
@@ -59,35 +74,50 @@ def train_sac(
         batch_size=256,
     )
 
-    rewards_per_episode = []
-    q_loss_per_episode = []
-    policy_loss_per_episode = []
+    # Logging containers
+    rewards_per_episode: List[float] = []
+    q_loss_per_episode: List[float] = []
+    policy_loss_per_episode: List[float] = []
 
+    # ========================
+    # Training loop
+    # ========================
     for ep in range(num_episodes):
         obs, _ = env.reset()
-        done = False
-        ep_reward = 0.0
-        ep_q_losses = []
-        ep_pi_losses = []
+        done: bool = False
+        ep_reward: float = 0.0
+        ep_q_losses: List[float] = []
+        ep_pi_losses: List[float] = []
 
         while not done:
             action = agent.select_action(obs, eval_mode=False)
             next_obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
 
-            agent.replay_buffer.push(obs, action, reward, next_obs, float(done))
+            agent.replay_buffer.push(
+                state=obs,
+                action=action,
+                reward=float(reward),
+                next_state=next_obs,
+                done=float(done),
+            )
+
             q_loss, pi_loss = agent.update()
             if q_loss is not None:
-                ep_q_losses.append(q_loss)
+                ep_q_losses.append(float(q_loss))
             if pi_loss is not None:
-                ep_pi_losses.append(pi_loss)
+                ep_pi_losses.append(float(pi_loss))
 
             obs = next_obs
-            ep_reward += reward
+            ep_reward += float(reward)
 
         rewards_per_episode.append(ep_reward)
-        q_loss_per_episode.append(np.mean(ep_q_losses) if ep_q_losses else np.nan)
-        policy_loss_per_episode.append(np.mean(ep_pi_losses) if ep_pi_losses else np.nan)
+        q_loss_per_episode.append(
+            float(np.mean(ep_q_losses)) if ep_q_losses else float("nan")
+        )
+        policy_loss_per_episode.append(
+            float(np.mean(ep_pi_losses)) if ep_pi_losses else float("nan")
+        )
 
         print(
             f"[SAC] Episode {ep+1}/{num_episodes} | "
@@ -96,7 +126,9 @@ def train_sac(
             f"Pi_loss: {policy_loss_per_episode[-1]:.4f}"
         )
 
+    # ========================
     # Plot training curves
+    # ========================
     plt.plot(rewards_per_episode)
     plt.title("SAC Episode Reward")
     plt.xlabel("Episode")
@@ -115,26 +147,34 @@ def train_sac(
     plt.ylabel("Policy Loss")
     save_plot("sac_policy_loss")
 
-    # Final backtest (greedy mode using deterministic policy)
+    # ========================
+    # Final backtest (deterministic policy)
+    # ========================
     obs, _ = env.reset()
     done = False
-    equity_curve = []
-    weights_history = []
+    equity_values: List[float] = []
+    weights_history: List[NDArray[np.float32]] = []
 
     while not done:
         action = agent.select_action(obs, eval_mode=True)
         next_obs, _, terminated, truncated, info = env.step(action)
-        equity_curve.append(info["portfolio_value"])
+        equity_values.append(float(info["portfolio_value"]))
         weights_history.append(env.weights.copy())
         done = terminated or truncated
         obs = next_obs
 
-    equity_curve = np.array(equity_curve)
-    weights_arr = np.array(weights_history)
-    peak = np.maximum.accumulate(equity_curve)
-    drawdown_curve = (equity_curve - peak) / peak
+    equity_curve: NDArray[np.float32] = np.array(
+        equity_values, dtype=np.float32
+    )
+    weights_arr: NDArray[np.float32] = np.array(
+        weights_history, dtype=np.float32
+    )
+    peak: NDArray[np.float32] = np.maximum.accumulate(equity_curve)
+    drawdown_curve: NDArray[np.float32] = (equity_curve - peak) / peak
 
-    # Final performance plots (same as DDQN version)
+    # ========================
+    # Final performance plots
+    # ========================
     plt.plot(equity_curve)
     plt.title("SAC Final Equity Curve")
     plt.xlabel("Time")
@@ -160,21 +200,20 @@ def train_sac(
     # ========================
     # Save SAC model and weight history
     # ========================
-    project_root = Path(__file__).resolve().parents[1]  # One level above src/ (FINAL_PROJECT)
+    project_root = Path(__file__).resolve().parents[1]  # one level above src/
     save_dir = project_root / "saved_models"
     save_dir.mkdir(exist_ok=True)
 
     # Save SAC model parameters
     model_path = save_dir / "sac_portfolio_model.pth"
-    agent.save(model_path)
-    
-    # Save portfolio weight history (weights_history)
-    # ============================
-    weights_history = np.array(weights_history)  # list -> numpy array
+    agent.save(str(model_path))
+
+    # Save portfolio weight history
     weights_path = save_dir / "weights_history.npy"
-    np.save(weights_path, weights_history)
+    np.save(weights_path, weights_arr)
 
     print(f"Weights history saved to {weights_path}")
+
 
 if __name__ == "__main__":
     train_sac()

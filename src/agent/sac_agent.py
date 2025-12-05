@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 from .networks_sac import QNetworkContinuous, GaussianPolicy
 from .replay_buffer_sac import ReplayBufferContinuous
@@ -22,20 +22,21 @@ class SACAgent:
         buffer_size: int = 100_000,
         batch_size: int = 256,
         device: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Soft Actor-Critic agent for continuous action spaces.
-        Includes:
+
+        Components:
             - Gaussian policy (actor)
             - Two Q-networks + target networks (critics)
             - Replay buffer
         """
 
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.gamma = gamma
-        self.tau = tau
-        self.alpha = alpha
-        self.batch_size = batch_size
+        self.device: str = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.gamma: float = gamma
+        self.tau: float = tau
+        self.alpha: float = alpha
+        self.batch_size: int = batch_size
 
         # Policy network (actor)
         self.policy = GaussianPolicy(state_dim, action_dim, hidden_dim).to(self.device)
@@ -64,8 +65,14 @@ class SACAgent:
     def select_action(self, state: np.ndarray, eval_mode: bool = False) -> np.ndarray:
         """
         Choose action given current state.
-        eval_mode = True → deterministic policy (for evaluation/backtesting)
-        eval_mode = False → stochastic policy (for exploration during training)
+
+        Args:
+            state:      current observation as a numpy array
+            eval_mode:  if True, use deterministic policy (for evaluation/backtesting);
+                        if False, use stochastic policy (for exploration during training)
+
+        Returns:
+            action as a numpy array (1D: action_dim,)
         """
         state_t = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
 
@@ -75,14 +82,17 @@ class SACAgent:
             else:
                 action, _ = self.policy(state_t)
 
-        return action.cpu().numpy()[0]
+        # Ensure the return type is seen as np.ndarray by mypy
+        action_np = action.cpu().numpy()[0]
+        return cast(np.ndarray, action_np)
 
     # ----------- SAC update step ----------
     def update(self) -> Tuple[Optional[float], Optional[float]]:
         """
         Perform one SAC update using a minibatch sampled from the replay buffer.
+
         Returns:
-            q_loss, policy_loss  (for logging)
+            (q_loss, policy_loss) for logging; both None if not enough samples yet.
         """
 
         # Not enough samples yet
@@ -169,7 +179,7 @@ class SACAgent:
         return float(q_loss.item()), float(policy_loss.item())
 
     # ----------- Save model -----------
-    def save(self, path: str):
+    def save(self, path: str) -> None:
         """
         Save policy and critic parameters to disk.
         """
@@ -184,7 +194,7 @@ class SACAgent:
         print(f"[SAC] Model saved to {path}")
 
     # ----------- Load model -----------
-    def load(self, path: str):
+    def load(self, path: str) -> None:
         """
         Load previously saved SAC model parameters.
         """
@@ -195,4 +205,3 @@ class SACAgent:
         self.q1_target.load_state_dict(ckpt["q1_target"])
         self.q2_target.load_state_dict(ckpt["q2_target"])
         print(f"[SAC] Model loaded from {path}")
-
