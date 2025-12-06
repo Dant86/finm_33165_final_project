@@ -1,0 +1,5 @@
+Final Portfolio Value: 3155402.18
+Sharpe Ratio: 0.0394
+Max Drawdown: -0.5186
+CAGR: 0.1424
+Calmar Ratio: 0.2746
