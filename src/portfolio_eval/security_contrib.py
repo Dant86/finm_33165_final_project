@@ -17,6 +17,7 @@ def calculate_market_value(
     weights = positions.filter(regex="weight_")
     weights.columns = weights.columns.str.replace("weight_", "")
     market_value = weights.multiply(positions["portfolio_value"], axis="index")
+    market_value.index = positions["date"]
 
     return market_value
 
@@ -64,18 +65,23 @@ def calculate_rolling_volatility(
     """
     gmv = calculate_market_value(positions)
 
-    cov = stock_returns.rolling(window_size).cov()
+    cov = stock_returns.rolling(window_size).cov().dropna()
 
-    vol = []
+    vol = {}
 
-    for date in positions["date"]:
-        vol.append(gmv.loc[date] @ cov @ gmv.loc[date].T)
+    for date in gmv.index.unique():
+        if date not in cov.index.get_level_values("date"):
+            continue
 
-    return pd.DataFrame(
-        index=positions["date"],
-        data=vol,
-        columns=["volatility"],
-    ) ** 0.5
+        cov_on_date = cov.loc[cov.index.get_level_values("date") == date].values
+        gmv_on_date = gmv.loc[date].values[:,None]
+
+        vol[date] = (gmv_on_date.T @ cov_on_date @ gmv_on_date)[0, 0] ** 0.5
+
+    srs = pd.Series(vol).to_frame(name="volatility")
+    srs.index = srs.index.rename("date")
+
+    return srs
 
 
 def calculate_rolling_volatility_ratio(
@@ -88,6 +94,8 @@ def calculate_rolling_volatility_ratio(
 
     total_vol = calculate_rolling_volatility(positions, stock_returns, window_size)
 
-    sec_vol = gmv.rolling(window_size).std()
 
-    return sec_vol.divide(total_vol["volatility"], axis="index")
+    sec_vol = stock_returns.rolling(window_size).std().dropna()
+    weighted_sec_vol = gmv * sec_vol
+
+    return weighted_sec_vol.dropna().divide(total_vol["volatility"], axis="index")
