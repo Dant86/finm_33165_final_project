@@ -81,7 +81,7 @@ def calculate_rolling_volatility(
     srs = pd.Series(vol).to_frame(name="volatility")
     srs.index = srs.index.rename("date")
 
-    return srs
+    return pd.DataFrame(srs)
 
 
 def calculate_rolling_volatility_ratio(
