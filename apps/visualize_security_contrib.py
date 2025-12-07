@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 
 from matplotlib import pyplot as plt
-from matplotlib import ticker as mtick
 import pandas as pd
 
 from src.portfolio_eval import security_contrib as sc
