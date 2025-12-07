@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec900b07-57ca-4afc-8ae1-780541e95837" name="Changes" comment="More">
+    <list default="true" id="ec900b07-57ca-4afc-8ae1-780541e95837" name="Changes" comment="Fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/visualize_security_contrib.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/visualize_security_contrib.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/portfolio_eval/security_contrib.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/portfolio_eval/security_contrib.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +23,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="sec_contrib" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -58,7 +56,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "sec__contrib",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "/Users/vedantpathak/PycharmProjects/finm_33165_final_project/presentation/reference_materials",
     "node.js.detected.package.eslint": "true",
@@ -244,7 +242,23 @@
       <option name="project" value="LOCAL" />
       <updated>1764973507893</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Vol contrib">
+      <option name="closed" value="true" />
+      <created>1764979984875</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1764979984875</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Fix">
+      <option name="closed" value="true" />
+      <created>1764980253409</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1764980253409</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -277,7 +291,6 @@
     <MESSAGE value="Initial Commit + README" />
     <MESSAGE value="Update README.md, add reference material and initialize project struct ure" />
     <MESSAGE value="Workflows" />
-    <MESSAGE value="Fix" />
     <MESSAGE value="Fix2" />
     <MESSAGE value="Fix3" />
     <MESSAGE value="Update" />
@@ -286,11 +299,13 @@
     <MESSAGE value="Add type" />
     <MESSAGE value="Calculation code" />
     <MESSAGE value="More" />
-    <option name="LAST_COMMIT_MESSAGE" value="More" />
+    <MESSAGE value="Vol contrib" />
+    <MESSAGE value="Fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/finm_33165_final_project$gen_fake_portfolio.coverage" NAME="gen_fake_portfolio Coverage Results" MODIFIED="1764977971541" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
-    <SUITE FILE_PATH="coverage/finm_33165_final_project$visualize_security_contrib.coverage" NAME="visualize_security_contrib Coverage Results" MODIFIED="1764979892806" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
+    <SUITE FILE_PATH="coverage/finm_33165_final_project$visualize_security_contrib.coverage" NAME="visualize_security_contrib Coverage Results" MODIFIED="1764980241795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
     <SUITE FILE_PATH="coverage/finm_33165_final_project$beta_adj_rets.coverage" NAME="beta_adj_rets Coverage Results" MODIFIED="1764973479110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/apps" />
   </component>
 </project>

@@ -40,7 +40,7 @@ def calculate_cum_pnl_contrib(
     """
     gmv = calculate_market_value(positions)
 
-    pnl = (gmv * stock_returns).cumsum()
+    pnl = (gmv * stock_returns).cumsum().dropna()
 
     return pnl
 
