@@ -7,7 +7,6 @@ import argparse
 from matplotlib import pyplot as plt
 import pandas as pd
 
-from src import constants
 from src.portfolio_eval import security_contrib as sc
 
 
@@ -22,10 +21,24 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--portfolio-fname",
+        type=str,
+        help="Path to load the input CSV file.",
+        default="ddqn_portfolio.parquet",
+    )
+
+    parser.add_argument(
         "--output-dir",
         type=str,
-        help="Path to save the output CSV file.",
+        help="Path to save the output PNG file.",
         default="../presentation/figures",
+    )
+
+    parser.add_argument(
+        "--output-fname",
+        type=str,
+        help="Path to save the output PNG file.",
+        default="vol_contrib.png",
     )
 
     return parser.parse_args()
@@ -98,14 +111,7 @@ def visualize_pnl_contrib(
 def main() -> None:
     args = parse_args()
 
-    positions = pd.read_csv(f"{args.input_dir}/test_portfolio_weights.csv")
-    positions["date"] = pd.to_datetime(positions["date"])
-    equity_curve = pd.read_csv(f"{args.input_dir}/test_equity_curve.csv")
-    equity_curve["date"] = pd.to_datetime(equity_curve["date"])
-    positions = positions.merge(equity_curve, on="date")
-    for ticker in constants.TICKERS:
-        positions = positions.rename(columns={ticker: f"weight_{ticker}"})
-
+    positions = pd.read_parquet(f"{args.input_dir}/{args.portfolio_fname}")
     stock_rets = pd.read_parquet(f"{args.input_dir}/stock_rets.parquet")
 
     fig = plt.Figure(figsize=(17, 11))
@@ -120,7 +126,7 @@ def main() -> None:
     visualize_pnl_contrib(positions, stock_rets, ax2)
 
     fig.tight_layout()
-    fig.savefig("../presentation/figures/vol_contrib.png", dpi=300)
+    fig.savefig(f"{args.output_dir}/{args.output_fname}", dpi=300)
 
 
 if __name__ == "__main__":

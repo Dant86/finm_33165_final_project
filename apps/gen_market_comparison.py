@@ -8,8 +8,8 @@ import argparse
 
 import pandas as pd
 from matplotlib import pyplot as plt
+import numpy as np
 
-from src import constants
 from src.portfolio_eval import security_contrib
 
 
@@ -24,10 +24,24 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--portfolio-fname",
+        type=str,
+        help="Path to load the input CSV file.",
+        default="ddqn_portfolio.parquet",
+    )
+
+    parser.add_argument(
         "--output-dir",
         type=str,
-        help="Path to save the output CSV file.",
+        help="Path to save the output PNG file.",
         default="../presentation/figures",
+    )
+
+    parser.add_argument(
+        "--output-fname",
+        type=str,
+        help="Path to save the output PNG file.",
+        default="market_comparison.png",
     )
 
     return parser.parse_args()
@@ -36,13 +50,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    positions = pd.read_csv(f"{args.input_dir}/test_portfolio_weights.csv")
-    positions["date"] = pd.to_datetime(positions["date"])
-    equity_curve = pd.read_csv(f"{args.input_dir}/test_equity_curve.csv")
-    equity_curve["date"] = pd.to_datetime(equity_curve["date"])
-    positions = positions.merge(equity_curve, on="date")
-    for ticker in constants.TICKERS:
-        positions = positions.rename(columns={ticker: f"weight_{ticker}"})
+    positions = pd.read_parquet(f"{args.input_dir}/{args.portfolio_fname}")
 
     stock_rets = pd.read_parquet(f"{args.input_dir}/stock_rets.parquet")
     beta_adj_rets = pd.read_parquet(f"{args.input_dir}/beta_adj_rets.parquet")
@@ -55,8 +63,16 @@ def main() -> None:
     total_port_rets = total_pnl.cumsum().pct_change()
     beta_adj_port_rets = beta_adj_pnl.cumsum().pct_change()
 
-    beta_adj_port_sharpe = beta_adj_port_rets.rolling(126).mean() / beta_adj_port_rets.rolling(126).std()
-    total_port_sharpe = total_port_rets.rolling(126).mean() / total_port_rets.rolling(126).std()
+    beta_adj_port_sharpe = (
+        beta_adj_port_rets.rolling(126).mean()
+        / beta_adj_port_rets.rolling(126).std()
+        / np.sqrt(252)
+    )
+    total_port_sharpe = (
+        total_port_rets.rolling(126).mean()
+        / total_port_rets.rolling(126).std()
+        / np.sqrt(252)
+    )
 
     fig, ax = plt.subplots(1, 2, figsize=(17, 11))
 
@@ -74,10 +90,46 @@ def main() -> None:
     ax[1].set_title("Total v/s Beta-adjusted Sharpe Ratio (126 days)")
 
     handles, labels = ax[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(1, 1), ncol=1)
+    fig.legend(handles, labels, loc="lower center", ncol=2)
 
     fig.tight_layout()
-    fig.savefig(f"{args.output_dir}/market_comparison.png", dpi=300)
+    fig.savefig(f"{args.output_dir}/{args.output_fname}", dpi=300)
+
+    max_dd_total = (
+        total_port_rets.cumsum() - total_port_rets.cumsum().cummax()
+    ).min() * -1
+    calmar_total = total_port_rets.cumsum().iloc[-1] / np.sqrt(252) / max_dd_total
+
+    max_dd_ba = (
+        beta_adj_port_rets.cumsum() - beta_adj_port_rets.cumsum().cummax()
+    ).min() * -1
+    calmar_ba = beta_adj_port_rets.cumsum().iloc[-1] / np.sqrt(252) / max_dd_ba
+
+    df = pd.DataFrame(
+        [
+            {
+                "Space": "Total",
+                "PnL (\\$)": total_pnl.sum(),
+                "Max Drawdown (\\%)": max_dd_total,
+                "Calmar Ratio": calmar_total,
+                "Sharpe Ratio": total_port_rets.mean()
+                / total_port_rets.std()
+                / np.sqrt(252),
+            },
+            {
+                "Space": "Beta-adjusted",
+                "PnL (\\$)": beta_adj_pnl.sum(),
+                "Max Drawdown (\\%)": max_dd_ba,
+                "Calmar Ratio": calmar_ba,
+                "Sharpe Ratio": beta_adj_port_rets.mean()
+                / beta_adj_port_rets.std()
+                / np.sqrt(252),
+            },
+        ]
+    )
+
+    df = df.set_index("Space").T
+    print(df.to_latex(float_format="%.3f"))
 
 
 if __name__ == "__main__":
