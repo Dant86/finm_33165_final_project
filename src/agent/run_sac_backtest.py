@@ -8,8 +8,8 @@ import pandas as pd
 import numpy as np
 from numpy.typing import NDArray
 
-from .env_continuous import ContinuousPortfolioEnv
-from .sac_agent import SACAgent
+from src.agent.env_continuous import ContinuousPortfolioEnv
+from src.agent.sac_agent import SACAgent
 from src.constants import TICKERS   # TICKERS = ["NVDA", "LLY", "JPM", "CAT"]
 
 
@@ -54,7 +54,7 @@ def run_backtest() -> None:
 
     # Use only data up to 2022-12-31
     cutoff = pd.Timestamp("2022-12-31")
-    price_df = price_df.loc[price_df.index <= cutoff]
+    price_df = price_df.loc[price_df.index > cutoff]
 
     # Drop any remaining NaNs
     price_df = price_df.dropna()
@@ -87,6 +87,7 @@ def run_backtest() -> None:
     # 4. Deterministic evaluation (no exploration noise)
     # -----------------------------
     done = False
+    dates: list[pd.Timestamp] = []
     equity_values: List[float] = []
     weights_history: List[NDArray[np.float32]] = []
 
@@ -97,6 +98,7 @@ def run_backtest() -> None:
         done = terminated or truncated
 
         equity_values.append(float(info["portfolio_value"]))
+        dates.append(info["date"])
         weights_history.append(env.weights.copy())
 
     # -----------------------------------------------------
@@ -137,17 +139,14 @@ def run_backtest() -> None:
     weights_arr = np.array(weights_history)  # shape (T, n_assets)
     df_weights = pd.DataFrame(
         weights_arr,
-        columns=[str(col) for col in env.assets]
+        columns=["weight_" + col for col in env.assets]
     )
-    df_weights["PortfolioValue"] = equity_curve
+    df_weights["portfolio_value"] = equity_curve
+    df_weights["date"] = dates
 
-    weights_csv_path = results_dir / "sac_weights_history.csv"
-    weights_excel_path = results_dir / "sac_weights_history.xlsx"
+    weights_csv_path = results_dir / "sac_weights_history.parquet"
 
-    df_weights.to_csv(weights_csv_path, index=False)
-    df_weights.to_excel(weights_excel_path, index=False)
-
-    print(f"Weights history saved to:\n  {weights_csv_path}\n  {weights_excel_path}")
+    df_weights.to_parquet(weights_csv_path, index=False)
 
     # -----------------------------
     # 7. Plot results

@@ -176,7 +176,8 @@ class ContinuousPortfolioEnv(gym.Env[ObsType, ActType]):
         self._last_obs = obs
 
         info: Dict[str, float] = {
-            "portfolio_value": float(self.portfolio_value)
+            "portfolio_value": float(self.portfolio_value),
+            "date": self.price_df.index[self.t],
         }
 
         return obs, reward, terminated, truncated, info

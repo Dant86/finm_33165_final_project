@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
         "--portfolio-fname",
         type=str,
         help="Path to load the input CSV file.",
-        default="ddqn_portfolio.parquet",
+        default="sac_weights_history.parquet",
     )
 
     parser.add_argument(
@@ -41,7 +41,7 @@ def parse_args() -> argparse.Namespace:
         "--output-fname",
         type=str,
         help="Path to save the output PNG file.",
-        default="market_comparison.png",
+        default="sac_market_comparison.png",
     )
 
     return parser.parse_args()
